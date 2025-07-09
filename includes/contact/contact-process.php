@@ -1,29 +1,42 @@
 <?php
-define( "WEBMASTER_EMAIL", 'your-email@domain.com' );
+// Set recipient email address
+$to = 'info@ecostruct.lk';
 
-$error = false;
-$fields = array( 'name', 'email', 'subject', 'message' );
+// Get form data
+$name = $_POST['name'];
+$email = $_POST['email'];
+$subject = $_POST['subject'];
+$message = $_POST['message'];
 
-foreach ( $fields as $field ) {
-	if ( empty( $_POST[$field] ) || trim( $_POST[$field] ) == '' )
-		$error = true;
-}
+// Prepare email headers
+$headers = "From: $name <$email>\r\n";
+$headers .= "Reply-To: $email\r\n";
+$headers .= "MIME-Version: 1.0\r\n";
+$headers .= "Content-Type: text/html; charset=UTF-8\r\n";
 
-if ( ! $error ) {
-	$name = stripslashes( $_POST['name'] );
-	$email = trim( $_POST['email'] );
-	$subject = stripslashes( $_POST['subject'] );
-	$message = stripslashes( $_POST['message'] );
+// Build email content
+$email_content = "
+<html>
+<head>
+    <title>New Contact Form Submission</title>
+</head>
+<body>
+    <h2>New Contact Form Submission</h2>
+    <p><strong>Name:</strong> $name</p>
+    <p><strong>Email:</strong> $email</p>
+    <p><strong>Subject:</strong> $subject</p>
+    <p><strong>Message:</strong><br>".nl2br($message)."</p>
+</body>
+</html>
+";
 
-	$mail = @mail( WEBMASTER_EMAIL, $subject, $message,
-		 "From: " . $name . " <" . $email . ">\r\n"
-		."Reply-To: " . $email . "\r\n"
-		."X-Mailer: PHP/" . phpversion() );
+// Send email
+$mail_sent = mail($to, $subject, $email_content, $headers);
 
-	if ( $mail ) {
-		echo "Success";
-	} else {
-		echo "Error";
-	}
+// Return response
+if ($mail_sent) {
+    echo '<div class="alert alert-success">Thank you! Your message has been sent successfully.</div>';
+} else {
+    echo '<div class="alert alert-danger">Sorry, there was an error sending your message. Please try again later.</div>';
 }
 ?>
